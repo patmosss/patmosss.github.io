@@ -1,0 +1,386 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author"><title>Linux-认识与分析登录文件 · Patmos</title><meta name="description" content="一、认识与分析登录文件
+《鸟叔的私房菜》
+
+1）Linux 常见的登录文件文件名
+​    登录文件可以帮助我们了解很多系统重要的事件，包括登陆者的部分信息，因此登录文件的权限通常是设置为仅有 root 能够读取而已。那么常见的几个登录文件有哪些呢？一般而言，有下面几个：
+
+
+/var/log/bo"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><meta name="generator" content="Hexo 5.4.2"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;"><h3 title=""><a href="/">Patmos</a></h3></div></div><ul class="social-links"></ul><div class="footer"><a target="_blank" href="/"><span>Theme by </span></a><a target="_blank" rel="noopener" href="https://www.caicai.me"> CaiCai </a><span>&</span><a target="_blank" rel="noopener" href="https://github.com/Ben02/hexo-theme-Anatole"> Ben</a><div class="by_farbox"><a href="https://hexo.io/zh-cn/" target="_blank">Proudly published with Hexo&#65281;</a></div></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/about">关于</a></li><li><a href="/archives">归档</a></li><li><a href="/links">友链</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>Linux-认识与分析登录文件</a></h3></div><div class="post-content"><h1 id="一、认识与分析登录文件"><a href="#一、认识与分析登录文件" class="headerlink" title="一、认识与分析登录文件"></a>一、认识与分析登录文件</h1><blockquote>
+<p>《鸟叔的私房菜》</p>
+</blockquote>
+<h2 id="1）Linux-常见的登录文件文件名"><a href="#1）Linux-常见的登录文件文件名" class="headerlink" title="1）Linux 常见的登录文件文件名"></a>1）<code>Linux</code> 常见的登录文件文件名</h2><blockquote>
+<p>​    登录文件可以帮助我们了解很多系统重要的事件，包括登陆者的部分信息，因此登录文件的权限通常是设置为仅有 <code>root</code> 能够读取而已。那么常见的几个登录文件有哪些呢？一般而言，有下面几个：</p>
+</blockquote>
+<ul>
+<li><code>/var/log/boot.log</code>： 开机的时候系统核心会去检测与启动硬件，接下来开始各种核心支持的功能启动等。这些流程都会记录在 <code>/var/log/boot.log</code> 里面！ 不过这个文件只会存在这次开机启动的信息，前次开机的信息并不会被保留下来！</li>
+<li><code>/var/log/cron</code>： 你的 <code>crontab</code> 调度有没有实际被进行？ 进行过程有没有发生错误？你的 <code>/etc/crontab</code> 是否撰写正确？在这个登录文件内查询看看。</li>
+<li><code>/var/log/dmesg</code>： 记录系统在开机的时候<strong>核心侦测过程所产生的各项信息</strong>。由于 <code>CentOS</code> 默认将开机时核心的硬件侦测过程取消显示， 因此额外将数据记录一份在这个文件中；</li>
+<li><code>/var/log/lastlog</code>： 可以记录系统上面所有的帐号<strong>最近一次登陆系统时的相关信息</strong>。<code>lastlog</code> 指令就是利用这个文件的记录信息来显示的。</li>
+<li><code>/var/log/maillog</code> 或 <code>/var/log/mail/</code>： 记录邮件的往来信息，其实主要是记录 <code>postfix</code> （<code>SMTP</code> 协定提供者） 与 <code>dovecot</code> （<code>POP3</code> 协定提供者） 所产生的信息啦。 <code>SMTP</code> 是发信所使用的通讯协定， <code>POP3</code> 则是收信使用的通讯协定。 <code>postfix</code> 与 <code>dovecot</code> 则分别是两套达成通讯协定的软件。</li>
+<li><code>/var/log/messages</code>： 这个文件相当的重要，几乎系统发生的错误信息 （或者是重要的信息） 都会记录在这个文件中； 如果系统发生莫名的错误时，这个文件是一定要查阅的登录文件之一。</li>
+<li><code>/var/log/secure</code>： 基本上，只要牵涉到“需要输入帐号密码”的软件，那么当登陆时 （不管登陆正确或错误） 都会被记录在此文件中。 包括系统的 <code>login</code> 程序、图形接口登陆所使用的 <code>gdm</code> 程序、 <code>su</code>, <code>sudo</code> 等程序、还有网络连线的 <code>ssh</code>, <code>telnet</code> 等程序， 登陆信息都会 被记载在这里；</li>
+<li><code>/var/log/wtmp</code>, <code>/var/log/faillog</code>： 这两个文件可以记录正确登陆系统者的帐号信息 （<code>wtmp</code>） 与错误登陆时所使用的帐号信息 （<code>faillog</code>） <code>last</code> 就是读取 <code>wtmp</code> 来显示的， 这对于追踪一般帐号者的使用行为很有帮助！</li>
+<li><code>/var/log/httpd/</code>, <code>/var/log/samba/</code>： 不同的网络服务会使用它们自己的登录文件来记载它们 自己产生的各项信息！上述的目录内则是个别服务所制订的登录文件。</li>
+</ul>
+<p>常见的登录文件就是这几个，但是不同的 <code>Linux distributions</code> ，通常登录文件的文件名不会相同 （除了 <code>/var/log/messages</code> 之外）。所以说，你还是得要查阅你 <code>Linux</code> 主机上面的登录文件设置数据， 才能知道你的登录文件主要文件名！</p>
+<ul>
+<li><p><strong>登录文件所需相关服务 （<code>daemon</code>） 与程序</strong> </p>
+<p>​    那么这些登录文件是怎么产生的呢？基本上有两种方式，①一种是由软件开发商自行定义写入的登录文件与相关格式， 例如 <code>WWW</code> 软件 <code>apache</code> 就是这样处理的。②另一种则是由 <code>Linux distribution</code>（<code>Linux</code> 发行版） 提供的登录文件管理服务来统一管理。 你只要将信息丢给这个服务后，他就会自己分门别类的将各种信息放置到相关的登录文件去！<code>CentOS</code> 提供 <code>rsyslog.service</code> 这个服务来统一管理登录文件！</p>
+<p>​    不过要注意的是，如果你任凭登录文件持续记录的话，由于系统产生的信息天天都有，那么你的登录文件的容量将会长大到无法无天～ 如果你的登录文件容量太大时，可能会导致大文件读写效率不佳的问题 （因为要从磁盘读入内存，越大的文件消耗内存量越多）。 所以， 你需要对登录文件备份与更新。我们可以通过 <code>logrotate</code> （登录文件轮替） 来自动化处理登录文件容量与更新的问题！</p>
+<p>​    所谓的 <code>logrotate</code> 基本上，就是将旧的登录文件更改名称，然后创建一个空的登录文件，如此 一来， 新的登录文件将重新开始记录，然后只要将旧的登录文件留下一阵子，嗯！那就可以达到将登录文件“轮转”的目的啦！ 此外，如果旧的记录 （大概要保存几个月吧！） 保存了一 段时间没有问题，那么就可以让系统自动的将他砍掉， 免得占掉很多宝贵的硬盘空间说！</p>
+<p>总结一下，针对登录文件所需的功能，我们需要的服务与程序有：</p>
+<ul>
+<li><code>systemd-journald.service</code>：最主要的信息收受者，由 <code>systemd</code> 提供的；</li>
+<li><code>rsyslog.service</code>：主要登录系统与网络等服务的信息； </li>
+<li><code>logrotate</code>：主要在进行登录文件的轮替功能。</li>
+</ul>
+</li>
+<li><p><code>CentOS 7.x</code> 使用 <code>systemd</code> 提供的 <code>journalctl</code> 日志管理**</p>
+<p>​    <code>CentOS 7</code> 除了保有既有的 <code>rsyslog.service</code> 之外，其实最上游还使用了 <code>systemd</code> 自己的登录文件日志管理功能！他使用的是 <code>systemd-journald.service</code> 这个服务来支持的。基本上，系统由 <code>systemd</code> 所管理，那所有经由 <code>systemd</code> 启动的服务，如果再启动或结束的过程中发生一 些问题或者是正常的信息， 就会将该信息由 <code>systemd-journald.service</code> 以二进制的方式记录下 来，之后再将这个信息发送给 <code>rsyslog.service</code> 作进一步的记载。</p>
+<p>​    <code>systemd-journald.service</code> 的记录主要都放置于内存中，因此在存取方面性能比较好～我们也能够通过 <code>journalctl</code> 以及 <code>systemctl status unit.service</code> 来查看各个不同服务的登录文件！ 这有个好处，就是登录文件可以随着个别服务让你查阅，在单一服务的处理上面，要比跑到 <code>/var/log/messages</code> 去大海捞针来的简易很多！ 不过，因为 <code>system-journald.service</code> 里面的很多观念还是沿用 <code>rsyslog.service</code> 相关的信息，先从 <code>rsyslog.service</code> 先谈起， 谈完之后再以 <code>journalctl</code> 进一步了解 <code>systemd</code> 是怎么去记录登录文件日志功能的。</p>
+</li>
+</ul>
+<hr>
+<h2 id="2）登录文件内容的一般格式"><a href="#2）登录文件内容的一般格式" class="headerlink" title="2）登录文件内容的一般格式"></a>2）登录文件内容的一般格式</h2><p>​    一般来说，系统产生的信息经过记录下来的数据中，每条信息均会记录下面的几个重要数据：</p>
+<ul>
+<li><strong>事件发生的日期与时间；</strong>  </li>
+<li><strong>发生此事件的主机名称；</strong> </li>
+<li><strong>启动此事件的服务名称 （如 <code>systemd</code>, <code>CROND</code> 等） 或指令与函数名称 （如 <code>su</code>, <code>login</code>..）；</strong>  </li>
+<li><strong>该信息的实际数据内容。</strong> </li>
+</ul>
+<p>以 <code>/var/log/secure</code> 为例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost log]# cat /var/log/secure </span><br><span class="line">May 16 03:51:24 localhost sshd[5331]: pam_unix(sshd:session): session closed for user root</span><br><span class="line">May 16 03:51:24 localhost login: ROOT LOGIN ON tty1</span><br><span class="line">May 16 04:18:56 localhost polkitd[703]: Registered Authentication Agent for unix-process:8134:4698912 (system bus name :</span><br><span class="line">1.168 [/usr/bin/pkttyagent --notify-fd 5 --fallback], object path /org/freedesktop/PolicyKit1/AuthenticationAgent, local</span><br><span class="line">e en_US.UTF-8</span><br></pre></td></tr></table></figure>
+
+<p>前两行：在 <code>05/16</code> 的 <code>03:51:24</code> 名为 <code>localhost</code> 的系统上，由 <code>login</code> 程序产生的信息 <code>ROOT LOGIN ON tty1</code> （<code>root</code> 在 <code>tty1</code> 登陆了），而相关的权限给予是通过 <code>pam_unix</code> 模块处理的。</p>
+<hr>
+<h2 id="3）rsyslog-service-：记录登录文件的服务"><a href="#3）rsyslog-service-：记录登录文件的服务" class="headerlink" title="3）rsyslog.service ：记录登录文件的服务"></a>3）<code>rsyslog.service</code> ：记录登录文件的服务</h2><p><strong>查看是否拥有 <code>rsyslog</code> 服务</strong> </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ps aux | grep rsyslog</span><br><span class="line">root       2807  0.0  0.2 308788  2940 ?        Ssl  09:37   0:00 /usr/sbin/rsyslogd -n</span><br><span class="line">[root@localhost ~]# systemctl status rsyslog.service </span><br><span class="line">● rsyslog.service - System Logging Service</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/rsyslog.service; enabled; vendor preset: enabled)</span><br><span class="line">   Active: active (running) since Sun 2021-05-16 09:37:03 EDT; 56min ago</span><br><span class="line">     Docs: man:rsyslogd(8)</span><br><span class="line">           http://www.rsyslog.com/doc/</span><br><span class="line"> Main PID: 2807 (rsyslogd)</span><br><span class="line">   CGroup: /system.slice/rsyslog.service</span><br><span class="line">           └─2807 /usr/sbin/rsyslogd -n</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-rsyslog-service-的配置文件：-etc-rsyslog-conf"><a href="#1-rsyslog-service-的配置文件：-etc-rsyslog-conf" class="headerlink" title="1. rsyslog.service 的配置文件：/etc/rsyslog.conf"></a>1. <code>rsyslog.service</code> 的配置文件：<code>/etc/rsyslog.conf</code></h3><blockquote>
+<p>​    基本上， <code>rsyslogd</code> 针对各种服务与信息记录在某些文件的配置文件就是 <code>/etc/rsyslog.conf</code>， 这个文件规定了“（<code>1</code>）什么服务 （<code>2</code>）的什么等级信息 （<code>3</code>）需要被记录在哪里（设备或文件）” 这三个，所以设置的语法会是这样：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">服务名称[.=!]信息等级   信息记录的文件名或设备或主机</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">下面以 mail 这个服务产生的 info 等级为例：</span></span><br><span class="line">mail.info   /var/log/maillog_info</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">这一行说明：mail 服务产生的 ≥ info 等级的信息，都会记录到 /var/log/maillog_info</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p><strong>解释说明：</strong> </p>
+<ul>
+<li><p><strong>服务名称</strong> </p>
+<p><code>rsyslogd</code> 主要还是通过 <code>Linux</code> 核心提供的 <code>syslog</code> 相关规范来设置数据的分类的，<code>Linux</code> 的 <code>syslog</code> 本身有规范一些服务信息， 你可以通过这些服务来储存系统的信息。<code>Linux</code> 核心的 <code>syslog</code> 认识的服务类型主要有下面这些：（可使用 <code>man 3 syslog</code> 查询到相关的信息，或查询 <code>syslog.h</code> 这个文件来了解的！）</p>
+<table>
+<thead>
+<tr>
+<th align="left">相对序号</th>
+<th align="left">服务类别</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>0</code></td>
+<td align="left"><code>kern(kernel)</code></td>
+<td align="left">就是核心 （<code>kernel</code>） 产生的信息，大部分都是硬件侦测以及核心功能的启用</td>
+</tr>
+<tr>
+<td align="left"><code>1</code></td>
+<td align="left"><code>user</code></td>
+<td align="left">在使用者层级所产生的信息，例如后续会介绍到的用户使用 <code>logger</code> 指令来记录登录文件的功能</td>
+</tr>
+<tr>
+<td align="left"><code>2</code></td>
+<td align="left"><code>mail</code></td>
+<td align="left">只要与邮件收发有关的信息记录都属于这个；</td>
+</tr>
+<tr>
+<td align="left"><code>3</code></td>
+<td align="left"><code>daemon</code></td>
+<td align="left">主要是系统的服务所产生的信息，例如 <code>systemd</code> 就是这个有 关的信息！</td>
+</tr>
+<tr>
+<td align="left"><code>4</code></td>
+<td align="left"><code>auth</code></td>
+<td align="left">主要与认证/授权有关的机制，例如 <code>login</code>, <code>ssh</code>, <code>su</code> 等需要帐号/密码登录的；</td>
+</tr>
+<tr>
+<td align="left"><code>5</code></td>
+<td align="left"><code>syslog</code></td>
+<td align="left">就是由 <code>syslog</code> 相关协定产生的信息，其实就是 <code>rsyslogd</code> 这支程序本身产生的信息啊！</td>
+</tr>
+<tr>
+<td align="left"><code>6</code></td>
+<td align="left"><code>lpr</code></td>
+<td align="left">即是打印相关的信息；</td>
+</tr>
+<tr>
+<td align="left"><code>7</code></td>
+<td align="left"><code>news</code></td>
+<td align="left">与新闻群组服务器有关的东西；</td>
+</tr>
+<tr>
+<td align="left"><code>8</code></td>
+<td align="left"><code>uucp</code></td>
+<td align="left">全名为 <code>Unix to Unix Copy Protocol</code>，早期用于 <code>unix</code> 系统间的程序数据交换；</td>
+</tr>
+<tr>
+<td align="left"><code>9</code></td>
+<td align="left"><code>cron</code></td>
+<td align="left">就是例行性工作调度 <code>cron/at</code> 等产生信息记录的地方；</td>
+</tr>
+<tr>
+<td align="left"><code>10</code></td>
+<td align="left"><code>authpriv</code></td>
+<td align="left">与 <code>auth</code> 类似，但记录较多帐号私人的信息，包括 <code>pam</code> 模块的运行等！</td>
+</tr>
+<tr>
+<td align="left"><code>11</code></td>
+<td align="left"><code>ftp</code></td>
+<td align="left">与 <code>FTP</code> 通讯协定有关的信息输出！</td>
+</tr>
+<tr>
+<td align="left"><code>16~23</code></td>
+<td align="left"><code>local0 ~ local7</code></td>
+<td align="left">保留给本机用户使用的一些登录文件信息，较常与终端机互动。</td>
+</tr>
+</tbody></table>
+<p>​    上面谈到的都是 <code>Linux</code> 核心的 <code>syslog</code> 函数自行制订的服务名称，软件开发商可以通过调用上述的服务名称来记录他们的软件。 举例来说， <code>sendmail</code> 与 <code>postfix</code> 及 <code>dovecot</code> 都是与邮件有关的软件，这些软件在设计登录文件记录时，都会主动调用 <code>syslog</code> 内的 <code>mail</code> 服务名称 （<code>LOG_MAIL</code>）。所以上述三个软件 （<code>sendmail, postfix, dovecot</code>） 产生的信息在 <code>syslog</code> 看起来，就会“是 <code>mail</code> ”类型的服务了。</p>
+<p>​    另外，每种服务所产生的数据量其实差异是很大的，举例来说，<code>mail</code> 的登录文件信息多的要命， 每一封信件进入后，<code>mail</code> 至少需要记录“寄信人的信息；与收信者的信息”等等； 而如果是用来做为工作站主机的，那么登陆者 （利用 <code>login</code> 登录主机处理事情） 的数量一定不少， 那个 <code>authpriv</code> 所管辖的内容可就多的要命了。</p>
+<p>​    为了让不同的信息放置到不同的文件当中，好让我们分门别类的进行登录文件的管理， 所以，将各种类别的服务之登录文件，记录在不同的文件里面，就是我们 <code>/etc/rsyslog.conf</code> 所要作的规范了！</p>
+</li>
+<li><p><strong>信息等级</strong> </p>
+<p>​    同一个服务所产生的信息也是有差别的，有启动时仅通知系统而已的一般信息 （<code>information</code>）， 有出现还不至于影响到正常运行的警告信息 （<code>warn</code>） ，还有系统硬件发生严重错误时，所产生的重大问题信息（<code>error</code> 等等）； 信息到底有多少种严重的等级呢？基本上，<code>Linux</code> 核心的 <code>syslog</code> 将信息分为七个主要的等级，根据 <code>syslog.h</code> 的定义，信息名称 与数值的对应如下：</p>
+<table>
+<thead>
+<tr>
+<th>等级数值</th>
+<th>等级名称</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>7</code></td>
+<td><code>debug</code></td>
+<td>用来 <code>debug</code> （除错） 时产生的信息数据；</td>
+</tr>
+<tr>
+<td><code>6</code></td>
+<td><code>info</code></td>
+<td>仅是一些基本的信息说明而已；</td>
+</tr>
+<tr>
+<td><code>5</code></td>
+<td><code>notice</code></td>
+<td>虽然是正常信息，但比 <code>info</code> 还需要被注意到的一些信息内容；</td>
+</tr>
+<tr>
+<td><code>4</code></td>
+<td><code>warning (warn)</code></td>
+<td>警示的信息，可能有问题，但是还不至于影响到某个 <code>daemon</code> 运行的信息；基本上， <code>info</code>, <code>notice</code>, <code>warn</code> 这三个信息都是在告知一些基本信息而已，应该还不至于造成一些系统运行困扰；</td>
+</tr>
+<tr>
+<td><code>3</code></td>
+<td><code>err (error)</code></td>
+<td>一些重大的错误信息，例如配置文件的某些设置值造成该服务无法启动的信息说明， 通常借由 <code>err</code> 的错误告知，应该可以了解到该服务无法启动的问题呢！</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td><code>crit</code></td>
+<td>比 <code>error</code> 还要严重的错误信息，这个 <code>crit</code> 是临界点（<code>critical</code>） 的缩写，这个错误已经很严重了！</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td><code>alert</code></td>
+<td>警告警告，已经很有问题的等级，比 <code>crit</code> 还要严重！</td>
+</tr>
+<tr>
+<td><code>0</code></td>
+<td><code>emerg (panic)</code></td>
+<td>疼痛等级，意指系统已经几乎要死机的状态！ 很严重的错误信息了。通常大概只有硬件出问题，导致整个核心无法顺利运 行，就会出现这样的等级的信息吧！</td>
+</tr>
+</tbody></table>
+<p><strong>特别留意一下在信息等级之前还有 <code>[.=!]</code> 的链接符号喔！他代表的意思是这样的：</strong> </p>
+<ul>
+<li><code>. </code>：代表“比后面还要严重的等级 （含该等级） 都被记录下来”的意思，例如： <code>mail.info</code> 代表只要是 <code>mail</code> 的信息，而且该信息等级严重于 <code>info</code> （含 <code>info</code> 本身）时，就会被记录下 来的意思。</li>
+<li><code>.=</code>：代表所需要的等级就是后面所写的等级。</li>
+<li><code>.!</code>：代表不等于， 亦即是除了该等级外的其他等级都记录。</li>
+</ul>
+<p><strong>一般来说，我们比较常使用的是“<code>.</code>”这个链接符号</strong> </p>
+<ul>
+<li>信息记录的文件名或设备或主机</li>
+</ul>
+<p><strong>信息的放置处：</strong> </p>
+<ul>
+<li><p><strong>文件的绝对路径</strong>：通常就是放在 <code>/var/log</code> 里头的文件</p>
+</li>
+<li><p><strong>打印机或其他</strong>：例如 <code>/dev/lp0</code> 这个打印机设备</p>
+</li>
+<li><p><strong>使用者名称</strong>：显示给使用者</p>
+</li>
+<li><p><strong>远端主机</strong>：例如 <code>@com.host.www</code> 当然，要对方主机也能支持才行</p>
+</li>
+<li><p><code>*</code>：代表“目前在线上的所有人”，类似 <code>wall</code> 这个指令的意义</p>
+</li>
+<li><p>服务、<code>daemon</code> 与函数名称</p>
+<table>
+<thead>
+<tr>
+<th><code>syslog</code></th>
+<th>这个是 <code>Linux</code> 核心所提供的登录文件设计指引，所有的要求大概都写入到一个名为 <code>syslog.h</code> 的头文件中。如果你想要开发与登录文件有关的软件， 那你就得要依循这个 <code>syslog</code> 函数的要求去设计才行！可以使用 <code>man 3 syslog</code> 去查询一下相关的数据！</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>rsyslogd</code></td>
+<td>为了要达成实际上进行信息的分类所开发的一套软件，所以，这就是最基本的 <code>daemon</code> 程序！</td>
+</tr>
+<tr>
+<td><code>rsyslog.service</code></td>
+<td>为了加入 <code>systemd</code> 的控制，因此 <code>rsyslogd</code> 的开发者设计的启动服务脚 本设置！</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>​    早期 <code>CentOS 5.x</code> 以前，要达成 <code>syslog</code> 的功能是由名为 <code>syslogd</code> 的 <code>daemon</code> 来完成的，从 <code>CentOS 6</code> 以来 （包含 <code>CentOS 7</code>） 则是通过 <code>rsyslogd</code> 这个 <code>daemon</code> </p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+<p><code>rsyslog.conf</code> 练习** </p>
+<p>​    ① 如果我要将我的 <code>mail</code> 相关的数据给他写入 <code>/var/log/maillog</code> 当中，那么在 <code>/etc/rsyslog.conf</code> 的语法如何配置？</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mail.info 	/var/log/maillog</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>.info</code> ：<code>date ≥ info</code>  </p>
+</blockquote>
+<p>​    ② 我要将新闻群组数据 （<code>news</code>） 及例行性工作调度 （<code>cron</code>） 的信息都写入到一个称为 <code>/var/log/cronnews</code> 的文件中，但是这两个程序的警告信息则额外的记录在 <code>/var/log/cronnews.warn</code> 中， 那该如何设置我的 <code>rsyslog.conf</code> 呢？</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">news.;cron.		/var/log/cronnews</span><br><span class="line">news.=warn;cron.=warn	/var/log/cronnews.warn</span><br></pre></td></tr></table></figure>
+
+<p>​    ③ 我的 <code>messages</code> 这个文件需要记录所有的信息，但是就是不想要记录 <code>cron</code>, <code>mail</code> 及 <code>news</code> 的信息，那么应该怎么写才好？</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">第一种写法: .;news,cron,mail.none	/var/log/messages</span><br><span class="line">第二种写法: .;news.none;cron.none;mail.none	/var/log/messages</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>使用“<code>,</code>”分隔时，那么等级只要接在最后一个即可，如果是以“<code>;</code>”来分的话， 那么就需要将服务与等级都写上去！这样会设置了吧！</p>
+</blockquote>
+<p><code>CentOS 7.x</code> 默认的 <code>rsyslog.conf</code> 内容** </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">kern.*													/dev/console</span></span><br><span class="line">*.info;mail.none;authpriv.none;cron.none                /var/log/messages</span><br><span class="line">authpriv.*                                              /var/log/secure</span><br><span class="line">mail.*                                                  -/var/log/maillog</span><br><span class="line">cron.*                                                  /var/log/cron</span><br><span class="line">*.emerg                                                 :omusrmsg:*</span><br><span class="line">uucp,news.crit                                          /var/log/spooler</span><br><span class="line">local7.*                                                /var/log/boot.log</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><p><code>#kern.*</code> ：只要是核心产生的信息，全部都送到 <code>console</code>（终端机） 去。<code>console</code> 通常是由外部设备连接到系统而来， 举例来说，很多封闭型主机 （没有键盘、屏幕的系统） 可以通过连接 <code>RS232</code> 连接口将信息传输到外部的系统中， 例如以笔记本电脑连接到封闭主机的 <code>RS232</code> 插口。这个项目通常应该是用在系统出现严重问题而无法使用默认的屏幕观察系统时， 可以通过这个项目来连接取得核心的信息。</p>
+</li>
+<li><p><code>*.info;mail.none;authpriv.none;cron.none </code> ：由于 <code>mail</code>, <code>authpriv</code>, <code>cron</code> 等类别产生的信息较多， 且已经写入下面的数个文件中，因此在 <code>/var/log/messages</code> 里面就不记录这些项目。除此之外的其他信息都写入 <code>/var/log/messages</code> 中。这也是为啥我们说这个 <code>messages</code> 文件很重要的缘故！</p>
+</li>
+<li><p><code>authpriv.* </code> ：认证方面的信息均写入 <code>/var/log/secure</code> 文件；</p>
+</li>
+<li><p><code>mail.*</code> ：：邮件方面的信息则均写入 <code>/var/log/maillog</code> 文件；</p>
+<blockquote>
+<p>​    记录的文件 <code>/var/log/maillog</code> 前面还有个减号“ <code>-</code> ”是干嘛用的？由于邮件所产生的信息比较多，因此我们希望邮件产生的信息先储存在速度较快的内存中（<code>buffer</code>） ，等到数据量够大了才一次性的将所有数据都填入磁盘内，这样将有助于登录文件的存取性能。 只不过由于信息是暂存在内存内，因此若不正常关机导致登录信息未回填到登录文件中，可能会造成部分数据的遗失。</p>
+</blockquote>
+</li>
+<li><p><code>cron.*</code>：例行性工作调度均写入 <code>/var/log/cron</code> 文件；</p>
+</li>
+<li><p><code>*.emerg</code> ：当产生最严重的错误等级时，将该等级的信息以 <code>wall</code> 的方式广播给所有在系统登陆的帐号得知， 要这么做的原因是希望在线的使用者能够赶紧通知系统管理员来处理这么可怕的错误问题。</p>
+</li>
+<li><p><code>uucp</code>,<code>news.crit</code> ：<code>uucp</code> 是早期 <code>Unix-like</code> 系统进行数据传递的通讯协定，后来常用在新闻群组的用途中。 <code>news</code> 则是新闻群组。当新闻群组方面的信息有严重错误时就写入 <code>/var/log/spooler</code> 文件中；</p>
+</li>
+<li><p><code>local7.*</code> ：将本机开机时应该显示到屏幕的信息写入到 <code>/var/log/boot.log</code> 文件中；</p>
+</li>
+</ol>
+<p><strong>自行增加登录文件文件功能</strong> </p>
+<p>​    如果你有其他的需求，所以需要特殊的文件来帮你记录时，千万给他记录在 <code>/etc/rsyslog.conf</code> 当中，如此一来，你就可以重复的将许多的信息记录在不同的文件当中，以方便你的管理！</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# vim /etc/rsyslog.conf</span><br><span class="line">*.info /var/log/admin.log</span><br><span class="line">[root@localhost ~]# systemctl restart rsyslog.service</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-登录文件的安全性设置"><a href="#2-登录文件的安全性设置" class="headerlink" title="2. 登录文件的安全性设置"></a>2. 登录文件的安全性设置</h3><p><strong>防止被入侵时，删除 <code>/var/log</code> 下的文件</strong> </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">通过 chattr 命令</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">-i 不能删除也不能添加</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">-a 只能添加不能删除</span></span><br><span class="line">[root@localhost ~]# chattr +a /var/log/admin.log</span><br><span class="line">[root@localhost ~]# lsattr /var/log/admin.log</span><br><span class="line">-----a---------- /var/log/admin.log</span><br><span class="line"></span><br><span class="line">[root@localhost ~]# chattr -a /var/log/admin.log</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-登录文件服务器的设置"><a href="#3-登录文件服务器的设置" class="headerlink" title="3. 登录文件服务器的设置"></a>3. 登录文件服务器的设置</h3><blockquote>
+<p>​    如果你有很多台 <code>Linux</code> 主机，每一台主机负责一个网络服务，你要了解每台主机的状态，查询登录文件。不能一个一个上去查看是吧？所以我们可以让一台主机当成 <code>登录文件服务器</code> 用它来记录这么多台的 <code>Linux</code> 主机的信息。我们只需在登录文件服务器上查看信息就 <code>OK</code> 了。</p>
+<p><code>Server: 10.4.7.100</code>、<code>Client: 10.4.7.101</code> </p>
+</blockquote>
+<h4 id="Server"><a href="#Server" class="headerlink" title="Server"></a><code>Server</code></h4><blockquote>
+<p>默认端口 <code>UDP/TCP 514</code> 网络稳定就用 <code>UDP</code> ，数据稳定传输就用 <code>TCP</code> </p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@a ~]# vim /etc/rsyslog.conf</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Provides TCP syslog reception</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">ModLoad imtcp</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">InputTCPServerRun 514</span></span><br><span class="line"></span><br><span class="line">[root@a ~]# systemctl restart rsyslog.service </span><br><span class="line">[root@a ~]# netstat -tunlp | grep rsyslog</span><br><span class="line">tcp        0      0 0.0.0.0:514             0.0.0.0:*               LISTEN      5097/rsyslogd       </span><br><span class="line">tcp6       0      0 :::514                  :::*                    LISTEN      5097/rsyslogd</span><br></pre></td></tr></table></figure>
+
+<h4 id="Client"><a href="#Client" class="headerlink" title="Client"></a><code>Client</code></h4><blockquote>
+<p>​    至于 <code>client</code> 端的配置，只要指定某个信息传送到这部主机即可！ 比如：我们的登录文件服务器 <code>IP</code> 为 <code>10.4.7.100</code>，而 <code>client</code> 端希望所有的数据都送给主机， 所以，可以在 <code>/etc/rsyslog.conf</code> 里面新增这样的一行：</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@b ~]# vim /etc/rsyslog.conf</span><br><span class="line">*.*     @@10.4.7.100</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">*.*    @10.4.7.100		<span class="comment"># 若用 UDP 传输，要设置这样</span></span></span><br><span class="line">[root@b ~]# systemctl restart rsyslog.service</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="4）登录文件的轮替（logroate）"><a href="#4）登录文件的轮替（logroate）" class="headerlink" title="4）登录文件的轮替（logroate）"></a>4）登录文件的轮替（<code>logroate</code>）</h2><blockquote>
+<p>​    假设我们已经将登录数据写入了记录文件中了，也已经利用 <code>chattr</code> 设置了 <code>+a</code> 这个属性了，那么该如何进行 <code>logrotate</code> 的工作呢？这里请特别留意的是：“<code>rsyslogd</code> 利用的是 <code>daemon</code> 的方式来启动的， 当有需求的时候立刻就会被执行的，但是 <code>logrotate</code> 却是在规定的时间到了之后才来进行登录文件的轮替，所以这个 <code>logrotate</code> 程序当然就是挂在 <code>cron</code> 下面进行的！” 仔细看一下 <code>/etc/cron.daily/</code> 里面的文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@a ~]# cat /etc/cron.daily/logrotate </span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/sh</span></span><br><span class="line"></span><br><span class="line">/usr/sbin/logrotate -s /var/lib/logrotate/logrotate.status /etc/logrotate.conf</span><br><span class="line">EXITVALUE=$?</span><br><span class="line">if [ $EXITVALUE != 0 ]; then</span><br><span class="line">    /usr/bin/logger -t logrotate &quot;ALERT exited abnormally with [$EXITVALUE]&quot;</span><br><span class="line">fi</span><br><span class="line">exit 0</span><br></pre></td></tr></table></figure>
+
+<p>​    <code>/etc/cron.daily/logrotate </code> 就是记录了每天要进行的登录文件轮替的行为了。</p>
+</blockquote>
+<h3 id="1-logrotate-的配置文件"><a href="#1-logrotate-的配置文件" class="headerlink" title="1. logrotate 的配置文件"></a>1. <code>logrotate</code> 的配置文件</h3><ul>
+<li><code>/etc/logrotate.conf</code> </li>
+<li><code>/etc/logrotate.d</code> </li>
+</ul>
+<blockquote>
+<p>​    <code>logrotate.conf</code> 才是主要的参数文件， <code>logrotate.d</code> 是一个目录， 该目录里面的所有文件都会被主动的读入 <code>/etc/logrotate.conf</code> 当中来进行！另外，在 <code>/etc/logrotate.d/</code> 里面的文件中，如果没有规定到的一些细部设置，则以 <code>/etc/logrotate.conf</code> 这个文件的规定来指定为默认值！</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">[root@a ~]# vim /etc/logrotate.conf</span><br><span class="line">weekly		# 默认每周对登录文件进行一次 rotate 的工作</span><br><span class="line">rotate 4	# 默认是保留四个</span><br><span class="line">create		# 由于登录文件被更名，因此创建一个新的来继续储存</span><br><span class="line">dateext		# 可以让被轮替的文件名称加上日期做为文件名</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">compress	<span class="comment"># 被更动的登录文件是否需要压缩？如果登录文件太大则可考虑此参数启动</span></span></span><br><span class="line"></span><br><span class="line">include /etc/logrotate.d</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将 /etc/logrotate.d/ 这个目录中的所有文件都读进来执行 rotate 的工作！</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">wtmp 可记录登陆者与系统重新开机时的时间与来源主机及登陆期间的时间。</span></span><br><span class="line">/var/log/wtmp &#123;				# 仅针对 /var/log/wtmp 所设置的参数</span><br><span class="line">    monthly					# 每个月一次，取代每周</span><br><span class="line">    create 0664 root utmp	# 指定新建文件的权限与所属帐号/群组</span><br><span class="line">	minsize 1M				# 文件大小一定要超过 1M 后才进行 rotate （略过时间参数）</span><br><span class="line">    rotate 1				# 仅保留一个，亦即仅有 wtmp.1 保留而已</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">记录错误登录的日志，就是说有很多人试图使用密码字典登录ssh服务，此日志需要使用lastb程序打开。</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">通过此文件发现有几个ip总是试图登录，可以使用防火墙把它屏蔽掉。</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看恶意ip试图登录次数 lastb | awk ‘&#123; <span class="built_in">print</span> <span class="variable">$3</span>&#125;’ | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c | <span class="built_in">sort</span> -n</span></span><br><span class="line">/var/log/btmp &#123;				# 仅针对 /var/log/btmp 所设置的参数</span><br><span class="line">    missingok				# 在日志轮循期间，任何错误将被忽略</span><br><span class="line">    monthly					# 每个月一次，取代每周</span><br><span class="line">    create 0600 root utmp	# 指定新建文件的权限与所属帐号/群组</span><br><span class="line">    rotate 1				# 仅保留一个，亦即仅有 btmp.1 保留而已</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>notifempty</code> ： 如果日志文件为空，轮循不会进行。</p>
+<p><code>missingok</code> ： 在日志轮循期间，任何错误将被忽略</p>
+</blockquote>
+<p><strong>语法</strong> </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">登录文件的绝对路径文件名 ... &#123;</span><br><span class="line">个别的参数设置值，如 monthly, compress 等等</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    下面我们再以 <code>/etc/logrotate.d/syslog</code> 这个轮替 <code>rsyslog.service</code> 服务的文件，来看看该如何设置他的 <code>rotate</code> 呢？</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@a log]# cat /etc/logrotate.d/syslog </span><br><span class="line">/var/log/cron</span><br><span class="line">/var/log/maillog</span><br><span class="line">/var/log/messages</span><br><span class="line">/var/log/secure</span><br><span class="line">/var/log/spooler</span><br><span class="line">&#123;</span><br><span class="line">    missingok</span><br><span class="line">    sharedscripts</span><br><span class="line">    postrotate</span><br><span class="line">	/bin/kill -HUP `cat /var/run/syslogd.pid 2&gt; /dev/null` 2&gt; /dev/null || true</span><br><span class="line">    endscript</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    在上面的语法当中，我们知道正确的 <code>logrotate</code> 的写法为： </p>
+<ul>
+<li><p><strong>文件名</strong>：被处理的登录文件绝对路径文件名写在前面，可以使用空白字符分隔多个登录文件； </p>
+</li>
+<li><p><strong>参数</strong>：上述文件名进行轮替的参数使用 <code>&#123; &#125;</code> 包括起来； </p>
+</li>
+<li><p><strong>执行脚本</strong>：可调用外部指令来进行额外的命令下达，这个设置需与 <code>sharedscripts .... endscript</code> 设置合用才行。至于可用的环境为： </p>
+<ul>
+<li><code>prerotate</code>：在启动 <code>logrotate</code> 之前进行的指令，例如修改登录文件的属性等动作； </li>
+<li><code>postrotate</code>：在做完 <code>logrotate</code> 之后启动的指令，例如重新启动 （<code>kill -HUP</code>） 某个服务！</li>
+<li><code>prerotate</code> 与 <code>postrotate</code> 对于已加上特殊属性的文件处理上面，是相当重要的执行程序！</li>
+</ul>
+<p>那么 <code>/etc/logrotate.d/syslog</code> 内设置的 <code>5</code> 个文件的轮替功能就变成了：</p>
+</li>
+<li><p>该设置只对 <code>/var/log/</code> 内的 <code>cron</code>, <code>maillog</code>, <code>messages</code>, <code>secure</code>, <code>spooler</code> 有效；</p>
+</li>
+<li><p>登录文件轮替每周一次、保留四个、且轮替下来的登录文件不进行压缩（未更改默认值）；</p>
+</li>
+<li><p>轮替完毕后 （<code>postrotate</code>） 取得 <code>syslog</code> 的 <code>PID</code> 后，以 <code>kill -HUP</code> 重新启动 <code>syslogd</code></p>
+</li>
+</ul>
+<p>​    假设我们有针对 <code>/var/log/messages</code> 这个文件增加 <code>chattr +a</code> 的属性时， 依据 <code>logrotate</code> 的工作原理，我们知道，这个 <code>/var/log/messages</code> 将会被更名成为 <code>/var/log/messages.1</code> 才是。但是 由于加上这个 <code>+a</code> 的参数啊，所以更名是不可能成功的！ 那怎么办呢？</p>
+<p>​    <code>prerotate</code> 与 <code>postrotate</code> 来进行登录文件轮替前、后所需要作的动作啊！ 那么你可以这样修改一下这个文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">[root@a ~]# vim /etc/logrotate.d/syslog</span><br><span class="line">/var/log/cron</span><br><span class="line">/var/log/maillog</span><br><span class="line">/var/log/messages</span><br><span class="line">/var/log/secure</span><br><span class="line">/var/log/spooler</span><br><span class="line">&#123;</span><br><span class="line">sharedscripts</span><br><span class="line">prerotate</span><br><span class="line">        /usr/bin/chattr -a /var/log/messages</span><br><span class="line">endscript</span><br><span class="line">sharedscripts</span><br><span class="line">postrotate</span><br><span class="line">        /bin/kill -HUP `cat /var/run/syslogd.pid 2&gt; /dev/null` 2&gt; /dev/null || true</span><br><span class="line">        /usr/bin/chattr +a /var/log/messages</span><br><span class="line">endscript</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-测试-logrotate"><a href="#2-测试-logrotate" class="headerlink" title="2. 测试 logrotate"></a>2. 测试 <code>logrotate</code></h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">[root@a ~]# logrotate [-vf] logfile</span><br><span class="line">选项与参数：</span><br><span class="line">-v ：启动显示模式，会显示 logrotate 运行的过程喔！</span><br><span class="line">-f ：不论是否符合配置文件的数据，强制每个登录文件都进行 rotate 的动作！</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">范例一：执行一次 logrotate 看看整个流程为何？</span></span><br><span class="line">[root@a logrotate.d]# logrotate -v /etc/logrotate.conf </span><br><span class="line">reading config file /etc/logrotate.conf		# 读取主配置文件</span><br><span class="line">including /etc/logrotate.d					# 调用外部的配置</span><br><span class="line">reading config file syslog					</span><br><span class="line">...</span><br><span class="line">Handling 14 logs</span><br><span class="line">...</span><br><span class="line">rotating pattern: /var/log/cron</span><br><span class="line">/var/log/maillog</span><br><span class="line">/var/log/messages</span><br><span class="line">/var/log/secure</span><br><span class="line">/var/log/spooler</span><br><span class="line"> weekly (4 rotations)</span><br><span class="line">empty log files are rotated, old logs are removed</span><br><span class="line">considering log /var/log/cron</span><br><span class="line">  log does not need rotating (log has been rotated at 2021-5-16 10:45, that is not week ago yet)</span><br><span class="line">considering log /var/log/maillog</span><br><span class="line">  log does not need rotating (log has been rotated at 2021-5-16 10:45, that is not week ago yet)</span><br><span class="line">considering log /var/log/messages		# 开始处理 messages</span><br><span class="line">  log does not need rotating (log has been rotated at 2021-5-16 10:45, that is not week ago yet) # 因为时间未到，不需要更动</span><br><span class="line">...</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">范例二：强制进行 logrotate 的动作</span></span><br><span class="line">[root@a logrotate.d]# logrotate -vf /etc/logrotate.conf </span><br><span class="line">...</span><br><span class="line">rotating log /var/log/messages, log-&gt;rotateCount is 4</span><br><span class="line">dateext suffix &#x27;-20210517&#x27;</span><br><span class="line">glob pattern &#x27;-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]&#x27;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">[root@a logrotate.d]# ll /var/log/messages*; lsattr /var/log/messages</span><br><span class="line">-rw------- 1 root root   150 May 17 03:42 /var/log/messages</span><br><span class="line">-rw------- 1 root root 21652 Mar 28 03:23 /var/log/messages-20210328</span><br><span class="line">-rw------- 1 root root 30050 May  9 06:37 /var/log/messages-20210509</span><br><span class="line">-rw------- 1 root root  8117 May 16 10:21 /var/log/messages-20210516</span><br><span class="line">-rw------- 1 root root  9398 May 17 03:34 /var/log/messages-20210517</span><br><span class="line">-----a---------- /var/log/messages</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-自订登录文件的轮替功能"><a href="#3-自订登录文件的轮替功能" class="headerlink" title="3. 自订登录文件的轮替功能"></a>3. 自订登录文件的轮替功能</h3><p>​    假设你已经创建了 <code>/var/log/admin.log</code> 这个文件，你想要将该文件加上 <code>+a</code> 这个隐藏标签，而且设置下面的相关信息：</p>
+<ul>
+<li>登录文件轮替一个月进行一次； </li>
+<li>该登录文件若大于 <code>10MB</code> 时，则主动进行轮替，不需要考虑一个月的期限； </li>
+<li>保存五个备份文件； </li>
+<li>备份文件需要压缩</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">先创建 +a 属性</span></span><br><span class="line">[root@b ~]# chattr +a /var/log/admin.log </span><br><span class="line">[root@b ~]# lsattr /var/log/admin.log </span><br><span class="line">-----a---------- /var/log/admin.log</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建 logrotate 配置文件</span></span><br><span class="line"></span><br><span class="line">/var/log/admin.log &#123;</span><br><span class="line">monthly 	# 每个月进行一次</span><br><span class="line">size=10M 	# 文件大小大于 10M 则开始处置</span><br><span class="line">rotate 5 	# 保留五个！</span><br><span class="line">compress 	# 进行压缩工作！</span><br><span class="line">sharedscripts</span><br><span class="line">prerotate</span><br><span class="line">	/usr/bin/chattr -a /var/log/admin.log</span><br><span class="line">endscript</span><br><span class="line">sharedscripts</span><br><span class="line">postrotate</span><br><span class="line">	/bin/kill -HUP `cat /var/run/syslogd.pid 2&gt; /dev/null` 2&gt; /dev/null || true</span><br><span class="line">	/usr/bin/chattr +a /var/log/admin.log</span><br><span class="line">endscript</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">测试 logrotate 相关功能的信息显示</span></span><br><span class="line">[root@b log]# logrotate -v /etc/logrotate.conf</span><br><span class="line">rotating pattern: /var/log/admin.log  10485760 bytes (5 rotations)</span><br><span class="line">empty log files are rotated, old logs are removed</span><br><span class="line">considering log /var/log/admin.log</span><br><span class="line">  log does not need rotating (log size is below the &#x27;size&#x27; threshold)</span><br><span class="line">not running prerotate script, since no logs will be rotated</span><br><span class="line">not running postrotate script, since no logs were rotated</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">测试 强制logrotate 相关功能的信息显示</span></span><br><span class="line">[root@b log]# logrotate -vf /etc/logrotate.conf</span><br><span class="line">rotating pattern: /var/log/admin.log  forced from command line (5 rotations)</span><br><span class="line">empty log files are rotated, old logs are removed</span><br><span class="line">considering log /var/log/admin.log</span><br><span class="line">  log needs rotating</span><br><span class="line">rotating log /var/log/admin.log, log-&gt;rotateCount is 5</span><br><span class="line">dateext suffix &#x27;-20210517&#x27;</span><br><span class="line">glob pattern &#x27;-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]&#x27;</span><br><span class="line">destination /var/log/admin.log-20210517.gz already exists, skipping rotation</span><br><span class="line"></span><br><span class="line">[root@b log]# lsattr admin*</span><br><span class="line">-----a---------- admin.log</span><br><span class="line">---------------- admin.log-20210517.gz</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="5）systemd-journald-service-简介"><a href="#5）systemd-journald-service-简介" class="headerlink" title="5）systemd-journald.service 简介"></a>5）<code>systemd-journald.service</code> 简介</h2><p>​    过去只有 <code>rsyslogd</code> 的年代中，由于 <code>rsyslogd</code> 必须要开机完成并且执行了 <code>rsyslogd</code> 这个 <code>daemon</code> 之后，登录文件才会开始记录。所以，核心还得要自己产生一个 <code>klogd</code> 的服务， 才能将系统在开机过程、启动服务的过程中的信息记录下来，然后等 <code>rsyslogd</code> 启动后才传送给它来处理。</p>
+<p>​    现在有了 <code>systemd</code> 之后，由于它是核心唤醒的，然后又是第一支执行的软件，它可以主动调用 <code>systemd-journald</code> 来协助记载登录文件，因此在开机过程中的所有信息，包括启动服务与服务若启动失败的情况等等，都可以直接被记录到 <code>systemd-journald</code> 里头去！ </p>
+<p>​    不过 <code>systemd-journald</code> 由于是使用于内存的登录文件记录方式，因此重新开机过后，开机前的登录文件信息当然就不会被记载了。 为此，我们还是建议启动 <code>rsyslogd</code> 来协助分类记录！ <strong>也就是说， <code>systemd-journald</code> 用来管理与查询这次开机后的登录信息，而 <code>rsyslogd</code> 可以用来记录以前及现在的所以数据到磁盘文件中，方便未来进行查询！</strong> </p>
+<blockquote>
+<p>​    虽然 <code>systemd-journald</code> 所记录的数据其实是在内存中，但是系统还是利用文件的型态将它记录到 <code>/run/log/</code> 下面！ 不过我们知道 <code>/run</code> 在 <code>CentOS 7</code> 其实是内存内的数据，所以重新开机过后，这个 <code>/run/log</code> 下面的数据当然就被刷新，旧的当然就不再存在了！</p>
+</blockquote>
+<h3 id="1-使用-journalctl-观察登录信息"><a href="#1-使用-journalctl-观察登录信息" class="headerlink" title="1. 使用 journalctl 观察登录信息"></a>1. 使用 <code>journalctl</code> 观察登录信息</h3><p>​    那么 <code>systemd-journald.service</code> 的数据要如何查阅呢？通过 <code>journalctl</code> 即可！</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">[root@a ~]# journalctl [-nrpf] [--since TIME] [--until TIME] _optional</span><br><span class="line">选项与参数：</span><br><span class="line">默认会输出全部的 log 内容，从旧的输出到最新的信息</span><br><span class="line">-n ：输出最近的几行的意思，找最新的信息相当有用</span><br><span class="line">-r ：反向输出，从最新的输出到最旧的数据</span><br><span class="line">-p ：输出后面所接的信息重要性排序！</span><br><span class="line">-f ：类似 tail -f 的功能，持续显示 journal 日志的内容（实时监测时相当有帮助！）</span><br><span class="line">--since --until：设置开始与结束的时间，让在该期间的数据输出而已</span><br><span class="line">_SYSTEMD_UNIT=unit.service ：只输出 unit.service 的信息而已</span><br><span class="line">_COMM=bash ：只输出与 bash 有关的信息</span><br><span class="line">_PID=pid ：只输出 PID 号码的信息</span><br><span class="line">_UID=uid ：只输出 UID 为 uid 的信息</span><br><span class="line">SYSLOG_FACILITY=[0-23] ：使用 syslog.h 规范的服务相对序号来调用出正确的数据！</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">范例一：输出目前系统中所有的 journal 日志数据</span></span><br><span class="line">[root@a ~]# journalctl </span><br><span class="line">-- Logs begin at Sun 2021-05-16 04:30:46 EDT, end at Mon 2021-05-17 04:01:01 EDT. --</span><br><span class="line">May 16 04:30:46 localhost.localdomain systemd-journal[90]: Runtime journal is using 6.0M (max allowed 48.6M, trying to l</span><br><span class="line">May 16 04:30:46 localhost.localdomain kernel: Initializing cgroup subsys cpuset</span><br><span class="line">May 16 04:30:46 localhost.localdomain kernel: Initializing cgroup subsys cpu</span><br><span class="line">May 16 04:30:46 localhost.localdomain kernel: Initializing cgroup subsys cpuacct</span><br><span class="line">May 16 04:30:46 localhost.localdomain kernel: Linux version 3.10.0-1062.el7.x86_64 (mockbuild@kbuilder.bsys.centos.org) </span><br><span class="line">May 16 04:30:46 localhost.localdomain kernel: Command line: BOOT_IMAGE=/vmlinuz-3.10.0-1062.el7.x86_64 root=/dev/mapper/</span><br><span class="line">May 16 04:30:46 localhost.localdomain kernel: Disabled fast string operations</span><br><span class="line">May 16 04:30:46 localhost.localdomain kernel: e820: BIOS-provided physical RAM map:</span><br><span class="line">May 16 04:30:46 localhost.localdomain kernel: BIOS-e820: [mem 0x0000000000000000-0x000000000009ebff] usable</span><br><span class="line">...</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">范例二：（1）仅显示出 2021/05/15 整天以及（2）仅今天及（3）仅昨天的日志数据内容</span></span><br><span class="line">[root@a ~]# journalctl --since &quot;2021-05-15 00:00:00&quot; --until &quot;2021-05-16 00:00:00&quot;</span><br><span class="line">[root@a ~]# journalctl --since today</span><br><span class="line">[root@a ~]# journalctl --since yesterday --until today</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">范例三：只找出 crond.service 的数据，同时只列出最新的 10 笔即可</span></span><br><span class="line">[root@a ~]# journalctl _SYSTEMD_UNIT=crond.service -n 10</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">范例四：找出 su, login 执行的登录文件，同时只列出最新的 10 笔即可</span></span><br><span class="line">[root@a ~]# journalctl _COMM=su _COMM=login -n 10</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">范例五：找出信息严重等级为错误 （error） 的信息！</span></span><br><span class="line">[root@a ~]# journalctl -p err</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">范例六：找出跟登录服务 （auth, authpriv） 有关的登录文件信息</span></span><br><span class="line">[root@a ~]# journalctl SYSLOG_FACILITY=4 SYSLOG_FACILITY=10</span><br></pre></td></tr></table></figure>
+
+<p>想要了解到登录文件的实时变化， 那又该如何处置呢？现在，请开两个终端机，让 我们来处理处理！</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">终端壹</span></span><br><span class="line">[root@a ~]# journalctl -f</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">终端贰</span></span><br><span class="line">[root@a ~]# echo &quot;Test&quot; | mail -s &#x27;test&#x27; dmtsai</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看 终端壹 的输出</span></span><br><span class="line">[root@a ~]# journalctl -f</span><br><span class="line">May 17 04:34:48 a yum[5294]: Installed: python-dns-1.12.0-4.20150617git465785f.el7.noarch</span><br><span class="line">May 17 04:34:48 a groupadd[5297]: group added to /etc/group: name=mailman, GID=41</span><br><span class="line">May 17 04:34:48 a groupadd[5297]: group added to /etc/gshadow: name=mailman</span><br><span class="line">May 17 04:34:48 a groupadd[5297]: new group: name=mailman, GID=41</span><br><span class="line">May 17 04:34:48 a useradd[5302]: new user: name=mailman, UID=41, GID=41, home=/usr/lib/mailman, shell=/sbin/nologin</span><br><span class="line">May 17 04:34:54 a systemd[1]: Reloading.</span><br><span class="line">May 17 04:34:54 a systemd[1]: Configuration file /etc/systemd/system/vsftpd2.service is marked executable. Please remove executable permission bits. Proceeding anyway.</span><br><span class="line">May 17 04:34:54 a systemd[1]: Configuration file /etc/systemd/system/vsftpd2.service is marked world-writable. Please remove world writability permission bits. Proceeding anyway.</span><br><span class="line">May 17 04:34:54 a yum[5294]: Installed: 3:mailman-2.1.15-26.el7_4.1.x86_64</span><br><span class="line">May 17 04:34:54 a yum[5294]: Installed: mailx-12.5-19.el7.x86_64</span><br><span class="line">May 17 04:34:59 a postfix/pickup[5222]: 3ADD730CC45D: uid=0 from=&lt;root&gt;</span><br><span class="line">May 17 04:34:59 a postfix/cleanup[5337]: 3ADD730CC45D: message-id=&lt;20210517083459.3ADD730CC45D@a.localdomain&gt;</span><br><span class="line">May 17 04:34:59 a postfix/qmgr[1227]: 3ADD730CC45D: from=&lt;root@a.localdomain&gt;, size=424, nrcpt=1 (queue active)</span><br><span class="line">May 17 04:34:59 a postfix/local[5339]: 3ADD730CC45D: to=&lt;dmtsai@a.localdomain&gt;, orig_to=&lt;dmtsai&gt;, relay=local, delay=0.27, delays=0.15/0.07/0/0.05, dsn=5.1.1, status=bounced (unknown user: &quot;dmtsai&quot;)</span><br><span class="line">May 17 04:34:59 a postfix/cleanup[5337]: 6B9BA30CC45E: message-id=&lt;20210517083459.6B9BA30CC45E@a.localdomain&gt;</span><br><span class="line">May 17 04:34:59 a postfix/qmgr[1227]: 6B9BA30CC45E: from=&lt;&gt;, size=2194, nrcpt=1 (queue active)</span><br><span class="line">May 17 04:34:59 a postfix/bounce[5340]: 3ADD730CC45D: sender non-delivery notification: 6B9BA30CC45E</span><br><span class="line">May 17 04:34:59 a postfix/qmgr[1227]: 3ADD730CC45D: removed</span><br><span class="line">May 17 04:34:59 a postfix/local[5339]: 6B9BA30CC45E: to=&lt;root@a.localdomain&gt;, relay=local, delay=0.02, delays=0.01/0/0/0.01, dsn=2.0.0, status=sent (delivered to mailbox)</span><br><span class="line">May 17 04:34:59 a postfix/qmgr[1227]: 6B9BA30CC45E: removed</span><br><span class="line">May 17 04:35:43 a sshd[3771]: pam_unix(sshd:session): session closed for user root</span><br><span class="line">May 17 04:35:43 a systemd-logind[697]: Removed session 18.</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-logger-指令的应用"><a href="#2-logger-指令的应用" class="headerlink" title="2. logger 指令的应用"></a>2. <code>logger</code> 指令的应用</h3><p>​    如果你想要让你的数据储存到登录文件当中呢？那该如何是好？ 这时就得要使用 <code>logger</code> 这个命令了！它可以传输很多信息，不过，我们只使用最简单的本机信息传递～ 更多的用法就请您自行 <code>man logger</code> </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@a ~]# logger [-p 服务名称.等级] &quot;信息&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">范例一：指定一下，让 dmtsai 使用 logger 来传送数据到登录文件内</span></span><br><span class="line">[root@a ~]# logger -p user.info &quot;I will check logger command&quot;</span><br><span class="line">[root@a ~]# journalctl SYSLOG_FACILITY=1 -n 3</span><br><span class="line">-- Logs begin at Sun 2021-05-16 04:30:46 EDT, end at Mon 2021-05-17 04:52:40 EDT. --</span><br><span class="line">May 17 04:34:54 a yum[5294]: Installed: 3:mailman-2.1.15-26.el7_4.1.x86_64</span><br><span class="line">May 17 04:34:54 a yum[5294]: Installed: mailx-12.5-19.el7.x86_64</span><br><span class="line">May 17 04:52:40 a root[5352]: I will check logger command</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-保存-journal-的方式"><a href="#3-保存-journal-的方式" class="headerlink" title="3. 保存 journal 的方式"></a>3. 保存 <code>journal</code> 的方式</h3><p>​    再强调一次，这个 <code>systemd-journald.servicd</code> 的信息是不会放到下一次开机后的，所以，重新开机后，那之前的记录通通会遗失。 虽然我们大概都有启动 <code>rsyslogd</code> 这个服务来进行后续的登录文件放置，不过如果你比较喜欢 <code>journalctl</code> 的存取方式，那么可以将这些数据储存下来！</p>
+<p>​    基本上，<code>systemd-journald.service</code> 的配置文件主要参考 <code>/etc/systemd/journald.conf</code> 的内容， 详细的参数你可以参考 <code>man 5 journald.conf</code> 的数据。 因为默认的情况下面，配置文件的内容应该已经符合我们的需求，所以这边就不再修改配置文件了。只是如果想要保存你的 <code>journalctl</code> 所读取的登录文件， 那么就得要创建一个 <code>/var/log/journal</code> 的目录，并且处理一下该目录的权限，那么未来重新启动 <code>systemd-journald.service</code> 之后， 日志登录文件就会主动的复制一份到 <code>/var/log/journal</code> 目录下。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建目录以及修改权限</span></span><br><span class="line">[root@a ~]# mkdir /var/log/journal</span><br><span class="line">[root@a ~]# chown root:systemd-journal /var/log/journal/</span><br><span class="line">[root@a ~]# chmod 2775 /var/log/journal/</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重启 systemd-journald 并且查看备份的日志数据</span></span><br><span class="line">[root@a ~]# systemctl restart systemd-journald</span><br><span class="line">[root@a ~]# ll /var/log/journal/fed03fba547c4a3db816e54097b6746b/</span><br><span class="line">total 8196</span><br><span class="line">-rw-r-----. 1 root systemd-journal 8388608 May 17 05:01 system.journal</span><br></pre></td></tr></table></figure>
+
+<p>​    你得要注意的是，因为现在整个日志登录文件的容量会持续长大，因此你最好还是观察一下你系统能用的总容量！避免不小心文件系统的容量被灌爆！ 此外，未来在 <code>/run/log</code> 下面就没有相关的日志可以观察了！因为移动到 <code>/var/log/journal</code> 下面来！ 既然我们还有 <code>rsyslog.service</code> 以及 <code>logrotate</code> 的存在，因此这个 <code>systemd-journald.service</code> 产生的登录文件， 个人建议最好还是放置到 <code>/run/log</code> 的内存当中， 以加快存取的速度！而既然 <code>rsyslog.service</code> 可以存放我们的登录文件， 似乎也没有必要再保存一份 <code>journal</code> 登录文件到系统当中就是了。</p>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2021-05-16</span><i class="fa fa-tag"></i><a class="tag" href="/tags/Linux/" title="Linux">Linux </a></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank"></a></div><div class="weibo"><a class="fa fa-weibo" href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));"></a></div><div class="twitter"><a class="fa fa-twitter" target="_blank" rel="noopener" href="http://twitter.com/home?status=,https://patmosss.github.io/2021/05/16/Linux-认识与分析登录文件/,Patmos,Linux-认识与分析登录文件,;"></a></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a class="btn" role="navigation" href="/2021/04/24/LFS6-3%E6%9E%84%E5%BB%BA/" title="LFS6.3构建">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
