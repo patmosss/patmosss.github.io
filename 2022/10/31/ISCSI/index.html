@@ -23,40 +23,40 @@ iSCSI 服务端: 10.4.7.100 、iSCSI客户端: 10.4.7.101
 <blockquote>
 <p>执行 <code>targetcli</code> 命令进行其交互界面，使用 <code>ls</code> 命令查看 <code>iSCSI</code> 服务端的结构</p>
 </blockquote>
-<p><img src="../../public/images/context/image-20210504225959504.png" alt="image-20210504225959504"></p>
+<p><img src="https://public-bucket-butatree-img.oss-cn-hangzhou.aliyuncs.com/img/image-20210504230449088.png" alt="image-20210504225959504"></p>
 <blockquote>
 <p>使用命令 <code>cd</code> 进入 <code>/backstores/block</code>，在该目录下使用 <code>create</code> 命令把 <code>/dev/md5</code> 加入共享资源池，并取名为 <code>disk5</code>。</p>
 </blockquote>
-<p><img src="../../public/images/context/image-20210504230238144.png" alt="image-20210504230238144"></p>
+<p><img src="https://public-bucket-butatree-img.oss-cn-hangzhou.aliyuncs.com/img/image-20210504225959504.png" alt="image-20210504230238144"></p>
 <blockquote>
 <p><strong>创建 <code>iSCSI target</code> 名称</strong></p>
 <p>使用命令 <code>cd</code> 进入 <code>iscsi</code> 目录，使用命令 <code>create</code> 创建 <code>iscsi target</code> 名称，<code>iscsi target</code> 名称是由系统自动生成的一串用于描述共享资源的唯一字符串</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">/iscsi&gt; </span><span class="language-bash">create</span></span><br><span class="line">Created target iqn.2003-01.org.linux-iscsi.a.x8664:sn.8c4e7748aedb.</span><br><span class="line">Created TPG 1.</span><br><span class="line">Global pref auto_add_default_portal=true</span><br><span class="line">Created default portal listening on all IPs (0.0.0.0), port 3260.</span><br></pre></td></tr></table></figure>
 </blockquote>
-<p><img src="../../public/images/context/image-20210504230449088.png" alt="image-20210504230449088"></p>
+<p><img src="https://public-bucket-butatree-img.oss-cn-hangzhou.aliyuncs.com/img/image-20210504230836692.png" alt="image-20210504230449088"></p>
 <blockquote>
 <p><strong>为 <code>iSCSI target</code> 配置共享资源</strong></p>
 <p>系统在生成 <code>target</code> 名称的同时，还会在 <code>/iscsi</code> 目录中创建一个与其字符串同名的新“目录”用来存放共享资源。我们需要把前面加入到 <code>iSCSI</code> 共享资源池中的硬盘设备添加到这个新目录中。</p>
 </blockquote>
-<p><img src="../../public/images/context/image-20210504230652997.png" alt="image-20210504230652997"></p>
+<p><img src="https://public-bucket-butatree-img.oss-cn-hangzhou.aliyuncs.com/img/image-20210504230652997.png" alt="image-20210504230652997"></p>
 <blockquote>
 <p>使用命令 <code>cd</code> 进入 <code>luns</code> 目录，使用命令 <code>create</code> 为 <code>iscsi target</code> 名称创建（添加）共享资源。</p>
 </blockquote>
-<p><img src="../../public/images/context/image-20210504230836692.png" alt="image-20210504230836692"></p>
+<p><img src="https://public-bucket-butatree-img.oss-cn-hangzhou.aliyuncs.com/img/image-20210504231435220.png" alt="image-20210504230836692"></p>
 <blockquote>
 <p><strong>设置 <code>target</code> 的访问控制列表</strong></p>
 <p>iSCSI协议通过客户端名称进行验证，当iSCSI客户端设置的名称与服务端中设置的访问控制列表中某一名称条目一致即可，因此需要在iSCSI服务端的配置文件中写入一串能够验证用户信息的名称。</p>
 </blockquote>
-<p><img src="../../public/images/context/image-20210504231033240.png" alt="image-20210504231033240"></p>
+<p><img src="https://public-bucket-butatree-img.oss-cn-hangzhou.aliyuncs.com/img/image-20210504230238144.png" alt="image-20210504231033240"></p>
 <blockquote>
 <p><strong>设置 <code>iSCSI</code> 服务端的监听 <code>IP</code> 地址和端口号</strong> </p>
 <p>设置监听的IP地址和端口号，若出现（ Could not create NetworkPortal in configFS ）错误提示，可执行命令delete 0.0.0.0 3260后重试。</p>
 </blockquote>
-<p><img src="../../public/images/context/image-20210504231327507.png" alt="image-20210504231327507"></p>
+<p><img src="https://public-bucket-butatree-img.oss-cn-hangzhou.aliyuncs.com/img/image-20210504231033240.png" alt="image-20210504231327507"></p>
 <blockquote>
 <p>设置完毕后，使用exit退出targetcli，并重启targetd服务。</p>
 </blockquote>
-<p><img src="../../public/images/context/image-20210504231435220.png" alt="image-20210504231435220"></p>
+<p><img src="https://public-bucket-butatree-img.oss-cn-hangzhou.aliyuncs.com/img/image-20210504231327507.png" alt="image-20210504231435220"></p>
 <blockquote>
 <p>设置或者关闭防火墙</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --premanent --add-port=3260/tcp</span><br><span class="line">firewall-cmd --reload</span><br></pre></td></tr></table></figure>
