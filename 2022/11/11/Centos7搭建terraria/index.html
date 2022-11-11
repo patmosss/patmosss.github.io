@@ -1,0 +1,207 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author"><title>Centos7搭建terraria · Patmos</title><meta name="description" content="CentOS7搭建terraria服务器
+
+DockerFile
+1234567891011121314151617FROM centos:7.4.1708RUN \     yum install -y wget &amp;amp;&amp;amp; \     mv /etc/yum.repos.d/CentO"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><meta name="generator" content="Hexo 5.4.2"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;"><h3 title=""><a href="/">Patmos</a></h3></div></div><ul class="social-links"></ul><div class="footer"><a target="_blank" href="/"><span>Theme by </span></a><a target="_blank" rel="noopener" href="https://www.caicai.me"> CaiCai </a><span>&</span><a target="_blank" rel="noopener" href="https://github.com/Ben02/hexo-theme-Anatole"> Ben</a><div class="by_farbox"><a href="https://hexo.io/zh-cn/" target="_blank">Proudly published with Hexo&#65281;</a></div></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/about">关于</a></li><li><a href="/archives">归档</a></li><li><a href="/links">友链</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>Centos7搭建terraria</a></h3></div><div class="post-content"><center><h4> CentOS7搭建terraria服务器</h4></center>
+
+<p><code>DockerFile</code></p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> centos:<span class="number">7.4</span>.<span class="number">1708</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> \</span></span><br><span class="line"><span class="language-bash">     yum install -y wget &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">     <span class="built_in">mv</span> /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">     wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">     yum clean all &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">     yum makecache &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">     yum install -y wget &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">     yum install -y screen &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">     yum install -y unzip</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> \</span></span><br><span class="line"><span class="language-bash">    <span class="built_in">mkdir</span> /terraria</span></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="language-bash"> /root</span></span><br><span class="line"><span class="keyword">EXPOSE</span> <span class="number">7777</span></span><br><span class="line"><span class="keyword">CMD</span><span class="language-bash"> /usr/sbin/sshd <span class="comment"># RUN：在build时运行，CMD在run时运行</span></span></span><br></pre></td></tr></table></figure>
+
+<p><code>CPU</code>：<code>2</code> 核以上</p>
+<p>内存：<code>2G</code> 以上</p>
+<p>带宽：<code>2M</code> 以上</p>
+<p>设置一下 <code>SWAP</code> 防止因为内存不足导致游戏被强迫关闭</p>
+<p>确认下 <code>SWAP</code> 设置了多少</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">free -m</span><br></pre></td></tr></table></figure>
+
+<p>如果足够 <code>1GB</code> 则跳过这一步直接开始搭建游戏！</p>
+<p>删除 <code>SWAP</code> 分区</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swapoff -a</span><br></pre></td></tr></table></figure>
+
+<p>新增 <code>SWAP</code> 分区</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dd if=/dev/zero of=/root/swapfile bs=1M count=1024</span><br></pre></td></tr></table></figure>
+
+<p>格式化交换分区文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkswap /root/swapfile</span><br></pre></td></tr></table></figure>
+
+<p>启用 <code>swap</code> 分区文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swapon /root/swapfile</span><br></pre></td></tr></table></figure>
+
+<p>添加开机启动</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/fstab</span><br></pre></td></tr></table></figure>
+
+<p>这里提一下 <code>vi</code> 编辑器的基本用法：<br>进入文本后按键盘上的 <code>insert</code> 按钮开始编辑，按 <code>esc</code> 退出编辑，输入 <code>:wq</code> 保存并退出。</p>
+<p>添加或修改</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/root/swapfile swap swap defaults 0 0</span><br></pre></td></tr></table></figure>
+
+<p>重启下是否生效</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reboot</span><br></pre></td></tr></table></figure>
+
+
+<p>重启后输入指令查看下SWAP是否增加</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">free -m</span><br></pre></td></tr></table></figure>
+
+<p>登录root账户后输入</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">yum install wget</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">yum install screen</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">yum install unzip</span></span><br></pre></td></tr></table></figure>
+
+<p>如果中途出现确认请输入 <code>y</code> 继续。<br>防火墙设置（如果有）：</p>
+<p>如果有防火墙的话则要开放端口</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">firewall-cmd --permanent --add-port=7777/tcp</span></span><br><span class="line">success</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">firewall-cmd --reload</span></span><br><span class="line">success</span><br></pre></td></tr></table></figure>
+
+
+<p>因为泰拉瑞亚默认使用 <code>7777</code> 端口这里就设置为 <code>7777</code>，可以根据自己的需求修改。</p>
+<p>给泰拉瑞亚服务器创建一个用户：</p>
+<p>虽然不是一定要创建用户，但是还是创建一个比较方便管理！</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">useradd terraria</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">passwd 设置一个密码尽量复杂点</span></span><br><span class="line">Changing password for user terraria</span><br><span class="line">New password:</span><br><span class="line">Retype new password:</span><br><span class="line">passwd: all authentication tokens updated successfully</span><br></pre></td></tr></table></figure>
+
+<p><code>useradd</code> 为账号这里推荐 <code>terraria</code></p>
+<p><code>passwd</code> 为密码尽量设置一个复杂的密码，其中密码输入的时候可能光标不会有任何反应，实际上已经在输入了！</p>
+<p>从泰拉瑞亚官方下载服务器包：</p>
+<p>创建好用户后我们先创建一个用来存放泰拉瑞亚服务器的文件夹</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">cd</span> /opt/</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">mkdir</span> terraria</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">mkdir</span> terraria/&#123;bin,downloads&#125;</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">chown</span> -R terraria:terraria terraria</span></span><br></pre></td></tr></table></figure>
+
+<p>这里前面的 <code>terraria:terraria terraria</code> 对应【账号名称:用户组名称 文件或目录】</p>
+<p>如果前面完全是按照本教程就全部 <code>terraria</code> 吧！</p>
+<p>下面开始下载。</p>
+<p>目前最新的版本为 <code>1402 </code> 所以对应的下载如下</p>
+<p><strong><code>su - terraria</code></strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> /opt/terraria/downloads</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">wget http://terraria.org/server/terraria-server-1353.zip</span></span><br></pre></td></tr></table></figure>
+
+<p>这样就下载了 <code>1402</code> 版本的安装包<br>将包解包</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">unzip terraria-server-1402.zip -d /opt/terraria/bin</span></span><br></pre></td></tr></table></figure>
+
+<p>制作一个设定文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cp</span> -p Windows/serverconfig.txt /opt/terraria/</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> /opt/terraria/</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">vi serverconfig.txt</span></span><br></pre></td></tr></table></figure>
+
+
+<p>这里再提一下 <code>vi</code> 编辑器的基本用法：</p>
+<p>进入文本后按键盘上的 <code>insert</code> 按钮开始编辑，按 <code>esc</code> 退出编辑，输入 <code>:wq</code> 保存并退出。</p>
+<p>在文件的末尾写上：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">world=/opt/terraria/Worlds/世界的名字.wld</span><br><span class="line">autocreate=2</span><br><span class="line">worldname=世界的名字</span><br><span class="line">difficulty=0</span><br><span class="line">maxplayers=4</span><br><span class="line">password=设定一个密码</span><br><span class="line">worldpath=/opt/terraria/Worlds</span><br></pre></td></tr></table></figure>
+
+
+<p>具体世界的名字和密码自定。</p>
+<p>其中</p>
+<ul>
+<li><code>autocreate</code> 是没有发现世界自动生成世界的大小 <code>1</code>、<code>2</code>、<code>3</code> 分别对应小、中、大</li>
+<li><code>difficulty</code> 对应的是 <code>0</code> 为普通，<code>1</code> 为专家</li>
+<li><code>maxplayers</code> 是最大人数</li>
+</ul>
+<p>给运行文件设置权限</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> /opt/terraria/bin/1353/Linux</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">chmod</span> 744 TerrariaServer.bin.x86_64</span></span><br></pre></td></tr></table></figure>
+
+
+<p>启动服务器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">./TerrariaServer.bin.x86_64 -config /opt/terraria/serverconfig.txt</span></span><br></pre></td></tr></table></figure>
+
+<p>初次运行因为要创建世界需要一定时间当看到</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Terraria Server v1.4.0.2</span><br><span class="line"></span><br><span class="line">Listening on port 7777</span><br><span class="line">Type ‘help’ for a list of commands.</span><br><span class="line">:</span><br></pre></td></tr></table></figure>
+
+<p>表示生成成功！</p>
+<p>此时可以在游戏的多人模式通过 <code>IP</code> 进入游戏看看是否成功。</p>
+<p>确认成功后退出服务器</p>
+<p><code>exit</code><br>重新编辑配置文件防止重新生成世界</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> /opt/terraria</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cp</span> -p serverconfig.txt serverconfig.txt_yyyymmdd</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">vi serverconfig.txt</span></span><br></pre></td></tr></table></figure>
+
+<p>将三个配置失效掉</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">autocreate=2</span><br><span class="line">worldname=世界的名字</span><br><span class="line">difficulty=1</span><br></pre></td></tr></table></figure>
+
+
+<p>改为</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">autocreate=2</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">worldname=Terraria</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">difficulty=1</span></span><br></pre></td></tr></table></figure>
+
+<p>再次运行一次看看是否成功将生成失效掉了<br>制作一个自动启动的脚本：</p>
+<p>每次重启都要重新启动很麻烦，这里就直接做一个自动启动脚本。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">vi terra_script.sh</span></span><br><span class="line">按insert输入</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line">USERNAME=&#x27;terraria&#x27;</span><br><span class="line">SCNAME=&#x27;terraria&#x27;</span><br><span class="line">TERA_VER=&#x27;1402&#x27;</span><br><span class="line">BIN_PATH=&quot;/opt/terraria/bin/$TERA_VER/Linux/&quot;</span><br><span class="line">SERVICE=&#x27;TerrariaServer.bin.x86_64&#x27;</span><br><span class="line">CONFIG=&#x27;/opt/terraria/serverconfig.txt&#x27;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">ME=`whoami`</span><br><span class="line"></span><br><span class="line">if [ $ME != $USERNAME ] ; then</span><br><span class="line">   echo &quot;Please run the $USERNAME user.&quot;</span><br><span class="line">   exit</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">start() &#123;</span><br><span class="line">   if pgrep -u $USERNAME -f $SERVICE &gt; /dev/null ; then</span><br><span class="line">       echo &quot;$SERVICE is already running!&quot;</span><br><span class="line">       exit</span><br><span class="line">   fi</span><br><span class="line"></span><br><span class="line">   echo &quot;Starting $SERVICE...&quot;</span><br><span class="line">   screen -AmdS $SCNAME $BIN_PATH$SERVICE -config $CONFIG</span><br><span class="line">   exit</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">./TerrariaServer.bin.x86_64 -config /opt/terraria/serverconfig.txt</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">screen</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">-A 　将所有的视窗都调整为目前终端机的大小。</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">-m 　即使目前已在作业中的screen作业，仍强制建立新的screen作业。</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">-d&lt;作业名称&gt; 　将指定的screen作业离线。</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">-S&lt;作业名称&gt; 　指定screen作业的名称。</span></span><br><span class="line"></span><br><span class="line">stop() &#123;</span><br><span class="line">   if pgrep -u $USERNAME -f $SERVICE &gt; /dev/null ; then</span><br><span class="line">       echo &quot;Stopping $SERVICE &quot;</span><br><span class="line">   else</span><br><span class="line">       echo &quot;$SERVICE is not running!&quot;</span><br><span class="line">       exit</span><br><span class="line">   fi</span><br><span class="line"></span><br><span class="line">   screen -p 0 -S $SCNAME -X eval &#x27;stuff &quot;say SERVER SHUTTING DOWN IN 10 SECONDS. &quot;\015&#x27;</span><br><span class="line">   sleep 10</span><br><span class="line">   screen -p 0 -S $SCNAME -X eval &#x27;stuff &quot;exit&quot;\015&#x27;</span><br><span class="line">   exit</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">save() &#123;</span><br><span class="line">   echo &#x27;World data saving...&#x27;</span><br><span class="line">   screen -p 0 -S $SCNAME -X eval &#x27;stuff &quot;say World saveing...&quot;\015&#x27;</span><br><span class="line">   screen -p 0 -S $SCNAME -X eval &#x27;stuff &quot;save&quot;\015&#x27;</span><br><span class="line">   exit</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">status() &#123;</span><br><span class="line">   if pgrep -u $USERNAME -f $SERVICE &gt; /dev/null ; then</span><br><span class="line">                echo &quot;$SERVICE is already running!&quot;</span><br><span class="line">                exit</span><br><span class="line">   else</span><br><span class="line">       echo &quot;$SERVICE is not running!&quot;</span><br><span class="line">       exit</span><br><span class="line">        fi</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">case &quot;$1&quot; in</span><br><span class="line">   start)</span><br><span class="line">       start</span><br><span class="line">       ;;</span><br><span class="line">   stop)</span><br><span class="line">       stop</span><br><span class="line">       ;;</span><br><span class="line">   save)</span><br><span class="line">       save</span><br><span class="line">       ;;</span><br><span class="line">   status)</span><br><span class="line">       status</span><br><span class="line">       ;;</span><br><span class="line">   *)</span><br><span class="line">       echo  $&quot;Usage: $0 &#123;start|stop|status|save&#125;&quot;</span><br><span class="line">esac</span><br></pre></td></tr></table></figure>
+
+<p>其中</p>
+<p><code>USERNAME=&#39;terraria&#39;</code></p>
+<p>要对应自己的用户名</p>
+<p>这样就分别有了「启动」「关闭」「保存」「重启」了。</p>
+<p>分别对应：</p>
+<ul>
+<li>服务器启动 <code>/opt/terraria/terra_script.sh start</code><br>服务器停止 <code>/opt/terraria/terra_script.sh stop</code><br>服务器重启 <code>/opt/terraria/terra_script.sh restart</code><br>确认状态 <code>/opt/terraria/terra_script.sh status</code><br>保存世界存档 <code>/opt/terraria/terra_script.sh save</code><br>给文件提升权限</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">chmod</span> 744 terra_script.sh</span></span><br></pre></td></tr></table></figure>
+
+<p>确认下启动</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sh -x ./terra_script.sh start</span></span><br></pre></td></tr></table></figure>
+
+<p>通过「screen -ls」确认下是否开启了窗口</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">screen -<span class="built_in">ls</span></span></span><br><span class="line">There is a screen on:</span><br><span class="line">        883.terraria    (Detached)</span><br><span class="line">1 Socket in /var/run/screen/S-terraria.</span><br></pre></td></tr></table></figure>
+
+<p>确认下关闭</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sh -x ./terra_script.sh stop</span></span><br></pre></td></tr></table></figure>
+
+<p>和上面一样</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">screen -<span class="built_in">ls</span></span></span><br><span class="line">No Sockets found in /var/run/screen/S-terraria.</span><br></pre></td></tr></table></figure>
+
+<p>设定自动启动：<br>进入root账号开始设定</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">su - root</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">cd</span> /etc/systemd/system</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">vi terraria.service</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">按Insert输入</span><br><span class="line"></span><br><span class="line">[Unit]</span><br><span class="line">Description=Terraria Server</span><br><span class="line">After=network.target local-fs.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=forking</span><br><span class="line">User=terraria</span><br><span class="line">ExecStart=/opt/terraria/terra_script.sh start</span><br><span class="line">ExecStop=/opt/terraria/terra_script.sh stop</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+
+<p>保存并退出后</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl enable terraria</span><br></pre></td></tr></table></figure>
+
+
+<p>重启下是否生效</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reboot</span><br></pre></td></tr></table></figure>
+
+
+<p>重启后服务依旧开启则大功告成啦！</p>
+<p>设置一个定时保存：</p>
+<p>首先安装启动服务</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">yum install crontabs</span><br><span class="line">systemctl enable crond</span><br><span class="line">systemctl start crond</span><br></pre></td></tr></table></figure>
+
+<p>编辑定时任务</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/crontab</span><br></pre></td></tr></table></figure>
+
+<p>可以看到</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># Example of job definition:</span><br><span class="line"></span><br><span class="line"># .---------------- minute (0 - 59)</span><br><span class="line"># |  .------------- hour (0 - 23)</span><br><span class="line"># |  |  .---------- day of month (1 - 31)</span><br><span class="line"># |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...</span><br><span class="line"># |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat</span><br><span class="line"># |  |  |  |  |</span><br><span class="line"></span><br><span class="line"># *  *  *  *  * user-name  command to be executed</span><br></pre></td></tr></table></figure>
+
+<p>末尾处插入</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">*/10 * * * * terraria /opt/terraria/terra_script.sh save</span><br></pre></td></tr></table></figure>
+
+<p>意思是每 <code>10</code> 分钟用 <code>terraria</code> 账户运行一次保存命令。</p>
+<p>这里还可以设置比如每天定时重启拉什么的。</p>
+<p>比如：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0 5 * * * terraria /opt/terraria/terra_script.sh save</span><br><span class="line">1 5 * * * root reboot</span><br></pre></td></tr></table></figure>
+
+<p>在重启前记得加一条保存。意思是每天5点1分重启，5点0分保存。</p>
+<p>在重启前记得加一条保存。意思是每天5点1分重启，5点0分保存。</p>
+<p>至此教程就全部结束了！</p>
+<hr>
+<p><strong><code>Linux screen</code> 命令</strong></p>
+<p><code>Linux screen</code> 命令用于多重视窗管理程序。</p>
+<p><code>screen</code> 为多重视窗管理程序。此处所谓的视窗，是指一个全屏幕的文字模式画面。通常只有在使用 <code>telnet</code> 登入主机或是使用老式的终端机时，才有可能用到 <code>screen</code> 程序。</p>
+<p><strong>语法</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">screen [-AmRvx -ls -wipe][-d &lt;作业名称&gt;][-h &lt;行数&gt;][-r &lt;作业名称&gt;][-s &lt;shell&gt;][-S &lt;作业名称&gt;]</span><br></pre></td></tr></table></figure>
+
+<p><strong>参数说明</strong>：</p>
+<ul>
+<li><code>-A</code>　将所有的视窗都调整为目前终端机的大小。</li>
+<li><code>-d</code> &lt;作业名称&gt; 　将指定的 <code>screen</code> 作业离线。</li>
+<li><code>-h</code> &lt;行数&gt; 　指定视窗的缓冲区行数。</li>
+<li><code>-m</code> 　即使目前已在作业中的 <code>screen</code> 作业，仍强制建立新的 <code>screen</code> 作业。</li>
+<li><code>-r</code> &lt;作业名称&gt; 　恢复离线的 <code>screen</code> 作业。</li>
+<li><code>-R</code> 　先试图恢复离线的作业。若找不到离线的作业，即建立新的 <code>screen</code> 作业。</li>
+<li><code>-s</code><shell> 　指定建立新视窗时，所要执行的 <code>shell</code>。</li>
+<li><code>-S</code> &lt;作业名称&gt; 　指定 <code>screen</code> 作业的名称。</li>
+<li><code>-v</code> 　显示版本信息。</li>
+<li><code>-x</code> 　恢复之前离线的 <code>screen</code> 作业。</li>
+<li><code>-ls</code> 或 <code>--list</code> 　显示目前所有的 <code>screen</code> 作业。</li>
+<li><code>-wipe</code> 　检查目前所有的 <code>screen</code> 作业，并删除已经无法使用的 <code>screen</code> 作业。</li>
+</ul>
+<h3 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h3><p>创建 <code>screen</code> 终端</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># screen //创建 screen 终端</span><br></pre></td></tr></table></figure>
+
+<p>创建 screen 终端 并执行任务</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># screen vi ~/main.c //创建 screen 终端 ，并执行 vi命令</span><br></pre></td></tr></table></figure>
+
+<p>离开 screen 终端</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># screen vi ~/main.c //创建 screen 终端 ，并执行 vi命令</span><br><span class="line"></span><br><span class="line">#include </span><br><span class="line"></span><br><span class="line">main ()</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&quot;~/mail.c&quot;       0,0-1    </span><br><span class="line"></span><br><span class="line">在 screen 终端 下 按下 Ctrl+a d键</span><br></pre></td></tr></table></figure>
+
+<p>重新连接离开的 screen 终端</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># screen -ls  //显示已创建的screen终端 </span><br><span class="line">There are screens on:</span><br><span class="line">2433.pts-3.linux    (2013年10月20日 16时48分59秒)    (Detached)</span><br><span class="line">2428.pts-3.linux    (2013年10月20日 16时48分05秒)    (Detached)</span><br><span class="line">2284.pts-3.linux    (2013年10月20日 16时14分55秒)    (Detached)</span><br><span class="line">2276.pts-3.linux    (2013年10月20日 16时13分18秒)    (Detached)</span><br><span class="line">4 Sockets in /var/run/screen/S-root.</span><br><span class="line"></span><br><span class="line"># screen -r 2276 //连接 screen_id 为 2276 的 screen终端</span><br></pre></td></tr></table></figure>
+
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2022-11-11</span><i class="fa fa-tag"></i><a class="tag" href="/tags/Linux/" title="Linux">Linux </a><a class="tag" href="/tags/terraria/" title="terraria">terraria </a></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank"></a></div><div class="weibo"><a class="fa fa-weibo" href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));"></a></div><div class="twitter"><a class="fa fa-twitter" target="_blank" rel="noopener" href="http://twitter.com/home?status=,https://patmosss.github.io/2022/11/11/Centos7搭建terraria/,Patmos,Centos7搭建terraria,;"></a></div></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a class="btn" role="navigation" href="/2022/11/11/Linux%E5%AE%9E%E7%8E%B0%E7%94%A8%E6%88%B7%E5%8F%8C%E5%9B%A0%E7%B4%A0%E8%AE%A4%E8%AF%81/" title="Linux实现用户双因素认证">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
